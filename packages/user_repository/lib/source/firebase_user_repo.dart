@@ -1,7 +1,16 @@
+// two import packages are not working
+
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:user_app/source/entities/entities.dart';
 import 'package:user_app/source/models/user.dart';
 import 'package:user_app/source/user_repo.dart';
 
 class FirebaseUserRepo implements UserRepository {
+  // ignore: unused_field
   final FirebaseAuth _firebaseAuth;
   final usersCollection = FirebaseFirestore.instance.collection('users');
 
@@ -10,30 +19,56 @@ class FirebaseUserRepo implements UserRepository {
   }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   @override
-  Future<void> logOut() {
-    // TODO: implement logOut
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> setUserData(MyUser user) {
-    // TODO: implement setUserData
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<MyUser> signUp(MyUser myUser, String password) {
-    // TODO: implement signUp
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> signin(String email, String password) {
-    // TODO: implement signin
-    throw UnimplementedError();
-  }
-
-  @override
   // TODO: implement user
-  Stream<MyUser?> get user => throw UnimplementedError();
+  Stream<MyUser?> get user {
+    return _firebaseAuth.authStateChanges().flatMap((FirebaseUser) async* {
+      if (FirebaseUser == null) {
+        yield MyUser.empty;
+      } else {
+        yield await usersCollection.doc(FirebaseUser.uid).get().then((value) =>
+            MyUser.formEntity(MyUserEntity.fromDocument(value.data()!)));
+      }
+    });
+  }
+
+  @override
+  Future<void> signin(String email, String password) async {
+    try {
+      await _firebaseAuth.signInWithEmailAndPassword(
+          email: email, password: password);
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
+
+  @override
+  Future<MyUser> signUp(MyUser myUser, String password) async {
+    try {
+      UserCredential user = await _firebaseAuth.createUserWithEmailAndPassword(
+          email: myUser.email, password: password);
+      myUser.userId = user.user!.uid;
+      return myUser;
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> logOut() async {
+    await _firebaseAuth.signOut();
+  }
+
+  @override
+  Future<void> setUserData(MyUser myUser) async {
+    try {
+      await usersCollection
+          .doc(myUser.userId)
+          .set(myUser.toEntity().toDocument());
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
 }
