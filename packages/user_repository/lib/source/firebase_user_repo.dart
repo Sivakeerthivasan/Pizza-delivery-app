@@ -1,4 +1,7 @@
+// two import packages are not working
+
 import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rxdart/rxdart.dart';
@@ -7,6 +10,7 @@ import 'package:user_app/source/models/user.dart';
 import 'package:user_app/source/user_repo.dart';
 
 class FirebaseUserRepo implements UserRepository {
+  // ignore: unused_field
   final FirebaseAuth _firebaseAuth;
   final usersCollection = FirebaseFirestore.instance.collection('users');
 
@@ -15,6 +19,7 @@ class FirebaseUserRepo implements UserRepository {
   }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   @override
+  // TODO: implement user
   Stream<MyUser?> get user {
     return _firebaseAuth.authStateChanges().flatMap((FirebaseUser) async* {
       if (FirebaseUser == null) {
