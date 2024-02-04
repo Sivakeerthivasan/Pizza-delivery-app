@@ -5,8 +5,9 @@ class MyAppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return  MaterialApp(
       title: "Pizza Delivery",
-    )
+      debugShowCheckedModeBanner: false,
+    );
   }
 }

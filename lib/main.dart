@@ -6,11 +6,9 @@ import 'package:pizza_app/simple_bloc_observer.dart';
 import 'package:user_repository/source/firebase_user_repo.dart';
 import 'package:user_repository/source/user_repo.dart';
 
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   Bloc.observer = SimpleBlocObserver();
-  runApp(MyApp(FirebaseUserRepo() ));
+  runApp(MyApp(FirebaseUserRepo()));
 }
